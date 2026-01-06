@@ -2,17 +2,20 @@ import { useState } from 'react';
 import NotificationModal from '../notification/NotificationModal';
 import { IoMdRefresh } from "react-icons/io";
 import { BiSolidBell } from "react-icons/bi";
+import { useAlert } from '../context/AlertContext';
 
 export default function Header() {
+  // ✅ 여기! 컴포넌트 안에서 호출
+  const { unreadCount } = useAlert();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    // 한 바퀴 회전 후 새로고침
     setTimeout(() => {
       window.location.reload();
-    }, 1000); // 1초 동안 회전
+    }, 1000);
   };
 
   return (
@@ -21,14 +24,19 @@ export default function Header() {
         <h1 className="text-2xl font-bold text-gray-800">
           Multimodal-CCTV
         </h1>
+
         <div className="flex items-center gap-4">
           {/* 알림 버튼 */}
-          <button 
+          <button  
             onClick={() => setIsModalOpen(true)}
             className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
             <BiSolidBell className="text-2xl text-yellow-500" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+
+            {/* ✅ unreadCount 있을 때만 빨간 점 */}
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            )}
           </button>
 
           {/* 새로고침 버튼 */}
@@ -38,7 +46,9 @@ export default function Header() {
             disabled={isRefreshing}
           >
             <IoMdRefresh 
-              className={`text-2xl text-gray-700 ${isRefreshing ? 'animate-spin-once' : ''}`}
+              className={`text-2xl text-gray-700 ${
+                isRefreshing ? 'animate-spin-once' : ''
+              }`}
             />
           </button>
         </div>

@@ -16,29 +16,9 @@ interface VideoItem {
   description: string;
   thumbnailUrl: string;
   videoUrl: string;
-  caption?: {
-    summary?: {
-      ko?: string;
-      en?: string;
-    };
-  };
 }
 
-interface CategoryVideosProps {
-  categoryType: string;
-  categoryName: string;
-}
-
-const behaviorMap: Record<string, string> = {
-  fall: "실신",
-  assault: "폭행",
-  theft: "절도",
-};
-
-export default function CategoryVideos({
-  categoryType,
-  categoryName,
-}: CategoryVideosProps) {
+export default function AllVideos() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filteredVideos, setFilteredVideos] = useState<VideoItem[]>([]);
@@ -46,7 +26,17 @@ export default function CategoryVideos({
   const [currentPage, setCurrentPage] = useState(1);
   const [allVideos, setAllVideos] = useState<VideoItem[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const itemsPerPage = 4; // ✅ 변경
+  const itemsPerPage = 4;
+
+  // 🔥 타입 한글 변환 함수
+  const translateType = (type: string): string => {
+    const typeMap: { [key: string]: string } = {
+      'assault': '폭행',
+      'fall': '실신',
+      'theft': '절도'
+    };
+    return typeMap[type.toLowerCase()] || type;
+  };
 
   const fetchVideos = async () => {
     try {
@@ -59,7 +49,7 @@ export default function CategoryVideos({
         const timestamp = new Date(item.timestamp);
         return {
           id: item.id,
-          type: behaviorMap[item.anomalyBehavior] ?? "미분류",
+          type: translateType(item.anomalyBehavior || "미분류"), // 🔥 한글 변환 적용
           location: item.cameraId || "알 수 없음",
           time: timestamp.toLocaleTimeString("ko-KR", {
             hour: "2-digit",
@@ -88,17 +78,14 @@ export default function CategoryVideos({
   useEffect(() => {
     const init = async () => {
       const videos = await fetchVideos();
-      const categoryVideos = videos.filter(
-        (video) => video.type === categoryName
-      );
-      setFilteredVideos(categoryVideos);
+      setFilteredVideos(videos);
       setHasSearched(true);
       setCurrentPage(1);
       setStartDate("");
       setEndDate("");
     };
     init();
-  }, [categoryType, categoryName]);
+  }, []);
 
   const getSeverityColor = (severity: string) => {
     return severity === "high"
@@ -125,9 +112,7 @@ export default function CategoryVideos({
 
     const filtered = allVideos.filter((video) => {
       const videoDate = new Date(video.date);
-      const matchesDate = videoDate >= start && videoDate <= end;
-      const matchesCategory = video.type === categoryName;
-      return matchesDate && matchesCategory;
+      return videoDate >= start && videoDate <= end;
     });
 
     setFilteredVideos(filtered);
@@ -136,8 +121,7 @@ export default function CategoryVideos({
   const handleShowAll = () => {
     setHasSearched(true);
     setCurrentPage(1);
-    const filtered = allVideos.filter((video) => video.type === categoryName);
-    setFilteredVideos(filtered);
+    setFilteredVideos(allVideos);
   };
 
   const handleReset = () => {
@@ -183,10 +167,8 @@ export default function CategoryVideos({
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          {categoryName}
-        </h2>
-        <p className="text-gray-600">{categoryName} 관련 영상 목록</p>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">전체</h2>
+        <p className="text-gray-600">모든 카테고리 영상 목록</p>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -254,9 +236,7 @@ export default function CategoryVideos({
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">
                   데이터가 없습니다
                 </h3>
-                <p className="text-gray-600">
-                  선택한 기간에 {categoryName} 영상이 없습니다
-                </p>
+                <p className="text-gray-600">선택한 기간에 영상이 없습니다</p>
               </div>
             </div>
           ) : (
@@ -305,7 +285,7 @@ export default function CategoryVideos({
                     <div className="p-5">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-sm text-gray-600 font-medium">
-                          📍 cameraId : {video.location}
+                          📍 {video.location}
                         </span>
                       </div>
                       <p className="text-gray-800 mb-3 font-medium">
@@ -408,7 +388,7 @@ export default function CategoryVideos({
           location={selectedVideo.location}
           date={selectedVideo.date}
           time={selectedVideo.time}
-          caption={selectedVideo.caption}
+          description={selectedVideo.description}
         />
       )}
     </div>

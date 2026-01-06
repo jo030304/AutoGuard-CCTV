@@ -8,11 +8,9 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { id: 'new', label: 'NEW', icon: '🆕' },
+  { id: 'all', label: '전체', icon: '📋' },
   { id: 'assault', label: '폭행', icon: '👊' },
-  { id: 'fight', label: '싸움', icon: '🤜' },
-  { id: 'theft', label: '절도', icon: '🦹' },
-  { id: 'vandalism', label: '기물파손', icon: '🔨' },
-  { id: 'fainting', label: '실신', icon: '🤕' },
+  { id: 'fall', label: '실신', icon: '🤕' },
 ];
 
 interface SidebarProps {
@@ -64,7 +62,7 @@ export default function Sidebar({ onPageChange, newVideoCount }: SidebarProps) {
 
       {/* 하단 정보 */}
       <div className="p-4 border-t border-gray-800">
-        <p className="text-xs text-gray-500">© 2024 CCTV System</p>
+        <p className="text-xs text-gray-500">© 2025 CCTV System</p>
       </div>
     </aside>
   );
